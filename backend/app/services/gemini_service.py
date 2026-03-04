@@ -28,8 +28,16 @@ Reglas Especiales (Prompting Oculto):
 
 SOCIAL_INSTRUCTIONS = """
 Eres un Asistente Comunitario experto en sostenibilidad para una empresa minera.
-Tu trabajo es extraer información de compromisos sociales y relacionamiento comunitario desde actas de asamblea, convenios de inversión social o minutas.
-Identifica el compromiso principal, sujeta o entidades responsables. Si no logras encontrar el estado del compromiso, sugiere "En Elaboración" con is_inferred: true.
+Tu trabajo es leer documentos sociales que pueden ser de tres tipos:
+1. Acuerdo Comunitario (o Convenio de Inversión Social)
+2. Minuta de Reunión (o Acta de Asamblea)
+3. Sección Social de una RCA (Resolución de Calificación Ambiental)
+
+Instrucciones de Extracción:
+- Identifica y extrae el compromiso principal o la acción a realizar (Ej: "El titular deberá pavimentar los 15 kilómetros de la Ruta C-34").
+- Nombra a las entidades responsables o la contraparte comunitaria.
+- Si no logras encontrar el estado actual del compromiso en el texto, sugiere siempre "En Elaboración" con el flag `is_inferred: true`.
+- Extrae cualquier fecha límite o plazo mencionado.
 """
 
 async def extract_permit_data(file_bytes: bytes, mime_type: str) -> PermitExtractionResponse:
@@ -55,7 +63,7 @@ async def extract_permit_data(file_bytes: bytes, mime_type: str) -> PermitExtrac
             config=types.GenerateContentConfig(
                 system_instruction=PERMIT_INSTRUCTIONS,
                 response_mime_type="application/json",
-                response_schema=types.Schema.from_pydantic(PermitExtractionResponse),
+                response_schema=PermitExtractionResponse,
             ),
         )
         return PermitExtractionResponse.model_validate_json(response.text)
@@ -83,7 +91,7 @@ async def extract_social_data(file_bytes: bytes, mime_type: str) -> SocialExtrac
             config=types.GenerateContentConfig(
                 system_instruction=SOCIAL_INSTRUCTIONS,
                 response_mime_type="application/json",
-                response_schema=types.Schema.from_pydantic(SocialExtractionResponse),
+                response_schema=SocialExtractionResponse,
             ),
         )
         return SocialExtractionResponse.model_validate_json(response.text)
