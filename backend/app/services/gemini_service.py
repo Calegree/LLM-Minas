@@ -1,7 +1,11 @@
 import os
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from app.models.schemas import PermitExtractionResponse, SocialExtractionResponse
+
+# Cargar variables desde el archivo .env
+load_dotenv()
 
 # Leer API KEY desde variables de entorno
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "dummy_key_for_testing")
