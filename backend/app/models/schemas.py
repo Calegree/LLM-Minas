@@ -19,3 +19,17 @@ class SocialExtractionResponse(BaseModel):
     estado_sugerido: FieldWithInference = Field(..., description="Estado inicial sugerido, ej. 'En Elaboración'")
     fecha_limite: FieldWithInference = Field(..., description="Fecha límite si la hay")
     responsables: FieldWithInference = Field(..., description="Personas o entidades responsables")
+
+class CommitmentExtractionResponse(BaseModel):
+    id_compromiso: FieldWithInference = Field(..., description="ID del compromiso, ej. 'RCA-123' o correlativo")
+    descripcion_compromiso: FieldWithInference = Field(..., description="Detalle de la obligación normativa que impone el EIA o la RCA")
+    origen_fuente: FieldWithInference = Field(..., description="Origen o fuente, ej. 'RCA 254/2018' o EIA")
+    tipo_compromiso: FieldWithInference = Field(..., description="Tipo de compromiso, ej. 'Ambiental', 'Social', 'Legal'")
+    gerencia_responsable: FieldWithInference = Field(..., description="Gerencia a cargo o sugerida, ej. 'Mina'")
+    area_instalacion: FieldWithInference = Field(..., description="Lugar donde aplica, ej. 'Rajo Norte, Tranque'")
+    empresa_contratista: FieldWithInference = Field(..., description="Tercero o contratista sugerido")
+    responsable: FieldWithInference = Field(..., description="Nombre del empleado encargado")
+    estado_inicial: FieldWithInference = Field(..., description="Estado del compromiso, ej. 'Pendiente', 'Cumplido'")
+    autoridad_fiscalizadora: FieldWithInference = Field(..., description="Entidad que fiscaliza, ej. 'SMA', 'DGA', 'SEA'")
+    vigencia_acotada: FieldWithInference = Field(..., description="'Verdadero' si tiene fecha de vencimiento o fin, 'Falso' si es permanente")
+    fecha_vencimiento: FieldWithInference = Field(..., description="Fecha si hay un plazo estipulado")

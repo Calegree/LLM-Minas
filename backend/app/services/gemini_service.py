@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from app.models.schemas import PermitExtractionResponse, SocialExtractionResponse
+from app.models.schemas import PermitExtractionResponse, SocialExtractionResponse, CommitmentExtractionResponse
 
 # Cargar variables desde el archivo .env
 load_dotenv()
@@ -38,6 +38,21 @@ Instrucciones de Extracción:
 - Nombra a las entidades responsables o la contraparte comunitaria.
 - Si no logras encontrar el estado actual del compromiso en el texto, sugiere siempre "En Elaboración" con el flag `is_inferred: true`.
 - Extrae cualquier fecha límite o plazo mencionado.
+"""
+
+COMMITMENT_INSTRUCTIONS = """
+Eres el Analista de Cumplimiento experto de una empresa minera.
+Tu trabajo es distinguir estrictamente entre un "PERMISO" (una autorización de la autoridad para operar, como SEREMI) y un "COMPROMISO" (una obligación de hacer algo que el proyecto debe cumplir, nacida de una RCA o EIA).
+Debes extraer únicamente la información correspondiente a COMPROMISOS (Ej: Pavimentar, financiar, monitorear polvo, reportar aguas). 
+
+Instrucciones de Extracción:
+- Extrae la descripción o detalle de la obligación normativa.
+- Extrae el Origen o fuente que impone el compromiso (EIA, número de RCA).
+- Infiere el Tipo de Compromiso (Ambiental, Social, Legal, etc.).
+- Si está relacionado con polvo/agua, asigna "Mina" en Gerencia Responsable con is_inferred: true.
+- Sugiere a la Entidad Fiscalizadora lógica para ese tipo de compromiso (Ej: SMA, DGA, SEA).
+- Si no hay estado claro en el texto, sugiere "Pendiente" con is_inferred: true.
+- Si el documento no especifica fecha de fin, establece "vigencia_acotada" como "Falso" y `is_inferred`: true.
 """
 
 async def extract_permit_data(file_bytes: bytes, mime_type: str) -> PermitExtractionResponse:
@@ -97,4 +112,40 @@ async def extract_social_data(file_bytes: bytes, mime_type: str) -> SocialExtrac
         return SocialExtractionResponse.model_validate_json(response.text)
     except Exception as e:
         print(f"Error calling Gemini AI for social commit: {e}")
+        raise e
+
+async def extract_commitment_data(file_bytes: bytes, mime_type: str) -> CommitmentExtractionResponse:
+    if client is None or GEMINI_API_KEY == "dummy_key_for_testing":
+        # Simulación de respuesta mockeada
+        return CommitmentExtractionResponse(
+            id_compromiso={"value": "Autogenerado", "is_inferred": True},
+            descripcion_compromiso={"value": "Implementar programa de monitoreo de polvo", "is_inferred": False},
+            origen_fuente={"value": "RCA 245/2018", "is_inferred": False},
+            tipo_compromiso={"value": "Ambiental", "is_inferred": True},
+            gerencia_responsable={"value": "Mina", "is_inferred": True},
+            area_instalacion={"value": "Rajo Abierto", "is_inferred": False},
+            empresa_contratista={"value": "GESTIONA", "is_inferred": True},
+            responsable={"value": "Ingeniero de Medioambiente", "is_inferred": True},
+            estado_inicial={"value": "Pendiente", "is_inferred": True},
+            autoridad_fiscalizadora={"value": "SMA", "is_inferred": True},
+            vigencia_acotada={"value": "Falso", "is_inferred": True},
+            fecha_vencimiento={"value": "Permanente", "is_inferred": True}
+        )
+        
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=[
+                types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
+                "Extrae los datos de esta obligación/compromiso y clasifícalos según la estructura requerida.",
+            ],
+            config=types.GenerateContentConfig(
+                system_instruction=COMMITMENT_INSTRUCTIONS,
+                response_mime_type="application/json",
+                response_schema=CommitmentExtractionResponse,
+            ),
+        )
+        return CommitmentExtractionResponse.model_validate_json(response.text)
+    except Exception as e:
+        print(f"Error calling Gemini AI for commitment extraction: {e}")
         raise e
