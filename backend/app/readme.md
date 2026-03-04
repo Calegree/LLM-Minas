@@ -1,9 +1,10 @@
 ## Backend
 
-### Activar entorno virtual
+### Activar entorno virtual e iniciar servidor con reload
 ```bash
 cd backend
 .\.venv\Scripts\activate
+uvicorn app.main:app --reload --port 8000
 ```
 
 ### Iniciar servidor
@@ -12,11 +13,6 @@ cd backend
 uvicorn app.main:app --port 8000
 ```
 
-### Iniciar servidor con reload
-
-```bash
-uvicorn app.main:app --reload --port 8000
-```
 ## Instalar dependencias
 
 ```bash
