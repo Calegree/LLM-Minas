@@ -24,6 +24,10 @@ Reglas Especiales (Prompting Oculto):
 - Si el documento habla de polvo o agua, la "gerencia_responsable" debe ser sugerida como "Minas" (con is_inferred en true si no es explícito).
 - Si el documento habla de comunidades indígenas, la "gerencia_responsable" debe ser "Gerencia de Asuntos Sociales" (con is_inferred en true si no es explícito).
 - Si no encuentras el contratista en el documento, sugiere "GESTIONA" como contratista marcando "is_inferred" como true (es tu deducción basada en historial).
+- Si el documento habla de medio ambiente o RCA, el "tipo_permiso" debe sugerirse como "Ambiental".
+- Si no encuentras un estado claro en el documento, sugiere "PENDIENTE" en "estado_gestion".
+- Infiere el "periodo" al año actual o el año mencionado en el documento si aplica.
+- Si el documento no especifica fecha de fin o de vencimiento, establece "vigencia_acotada" como "Falso" y "is_inferred" en true.
 """
 
 SOCIAL_INSTRUCTIONS = """
@@ -61,11 +65,15 @@ async def extract_permit_data(file_bytes: bytes, mime_type: str) -> PermitExtrac
         return PermitExtractionResponse(
             nombre_permiso={"value": "Monitoreo de Calidad de Aire Fase I", "is_inferred": False},
             referencia_legal={"value": "RCA 245/2018", "is_inferred": False},
+            estado_gestion={"value": "PENDIENTE", "is_inferred": True},
             autoridad_competente={"value": "SEREMI SALUD", "is_inferred": False},
-            vencimiento={"value": "15 Oct 2024", "is_inferred": False},
             gerencia_responsable={"value": "Minas", "is_inferred": True},
             contratista_sugerido={"value": "GESTIONA", "is_inferred": True},
-            responsable={"value": "Juan Pérez", "is_inferred": False}
+            tipo_permiso={"value": "Ambiental", "is_inferred": True},
+            responsable={"value": "Juan Pérez", "is_inferred": False},
+            periodo={"value": "2024", "is_inferred": True},
+            vencimiento={"value": "15 Oct 2024", "is_inferred": False},
+            vigencia_acotada={"value": "Verdadero", "is_inferred": True}
         )
 
     try:

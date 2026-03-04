@@ -8,11 +8,15 @@ class FieldWithInference(BaseModel):
 class PermitExtractionResponse(BaseModel):
     nombre_permiso: FieldWithInference = Field(..., description="El título del permiso, ej. 'Monitoreo de Calidad de Aire Fase I'")
     referencia_legal: FieldWithInference = Field(..., description="Número en el encabezado oficial, ej. 'RCA 245/2018'")
+    estado_gestion: FieldWithInference = Field(..., description="Estado de gestión del permiso, ej. 'PENDIENTE' o 'VIGENTE'")
     autoridad_competente: FieldWithInference = Field(..., description="Entidad que emite, ej. 'SEREMI SALUD'")
-    vencimiento: FieldWithInference = Field(..., description="Fecha de vencimiento calculada o explícita, ej. '15 Oct 2024'")
     gerencia_responsable: FieldWithInference = Field(..., description="Gerencia a cargo (Minas, Asuntos Sociales, etc.)")
     contratista_sugerido: FieldWithInference = Field(..., description="Contratista deducido para el trabajo, ej. 'GESTIONA'")
+    tipo_permiso: FieldWithInference = Field(..., description="Tipo de permiso, ej. 'Ambiental', 'Sectorial'")
     responsable: FieldWithInference = Field(..., description="Nombre del empleado responsable")
+    periodo: FieldWithInference = Field(..., description="Año o periodo anual que cubre, ej. '2024'")
+    vencimiento: FieldWithInference = Field(..., description="Fecha de vencimiento calculada o explícita, ej. '15 Oct 2024'")
+    vigencia_acotada: FieldWithInference = Field(..., description="'Verdadero' si tiene fecha de vencimiento o fin, 'Falso' si es permanente o no aplica")
 
 class SocialExtractionResponse(BaseModel):
     compromiso: FieldWithInference = Field(..., description="Descripción del compromiso, ej. 'Pavimentar 15 km de la Ruta C-34'")
